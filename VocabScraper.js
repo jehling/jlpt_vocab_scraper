@@ -25,7 +25,6 @@ async function getVocabList(url){
     let vocabTable = $('#jl-vocab:first tbody').children();
     let vocabList = [];
     for (const row of vocabTable){
-        // let num = $(row).find('.jl-td-num').text().trim();
         let term = $(row).find('.jl-td-v:first').text().trim();
         if(term.length == 0) continue;
         vocabList.push(term);
@@ -34,7 +33,7 @@ async function getVocabList(url){
     return vocabList;
 }
 
-async function paginationUrlList(rootUrl){
+async function getPaginationURLs(rootUrl){
     let dom = await JSDOM.fromURL(rootUrl);
     let $ = jquery(dom.window);
     let pageUrlList = [rootUrl];
@@ -48,11 +47,20 @@ async function paginationUrlList(rootUrl){
     return pageUrlList;
 }
 
-try{
-    let url = getUrl();
-    getVocabList(url);
-    paginationUrlList(url).then(console.log);
-    
-} catch(err){
-    console.log(err.message);
+async function getMasterVocabList(){
+    try{
+        let masterVocabList = [];
+        let rootUrl = getUrl();
+        let urlList = await getPaginationURLs(rootUrl);
+        for (const url of urlList){
+            let vocabList = await getVocabList(url);
+            masterVocabList = masterVocabList.concat(vocabList);   
+        }
+        console.log(`${masterVocabList.length} TERM MASTER VOCAB LIST COMPLETED`);
+        return masterVocabList;
+    } catch(err){
+        console.log(err.message);
+    }
 }
+
+getMasterVocabList();
