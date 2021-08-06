@@ -26,10 +26,15 @@ async function getVocabList(nLevel){
     let dom = await JSDOM.fromURL(JLPT_SENSEI_URL_PREFIX + JLPT_VOCAB_URL);
     let $ = jquery(dom.window);
     let vocabTable = $('#jl-vocab:first tbody').children();
-    for (const row of vocabTable){
-        console.log($(row).text());
-    }
     let vocabList = [];
+    for (const row of vocabTable){
+        // let num = $(row).find('.jl-td-num').text().trim();
+        let term = $(row).find('.jl-td-v:first').text().trim();
+        if(term.length == 0) continue;
+        vocabList.push(term);
+    }
+    console.log(`${vocabList.length} TERMS GENERATED`);
+    return vocabList;
 }
 
 try{
