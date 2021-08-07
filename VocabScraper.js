@@ -6,8 +6,9 @@ const fs = require('fs');
 
 // Constants
 const JLPT_SENSEI_URL_PREFIX = 'https://jlptsensei.com/';
-const OUTPUT_DELIMETER = '\t';
 const OUTPUT_DIR = './output_dir/';
+const OUTPUT_DELIMETER = "\n";
+const OUTPUT_FILE = "vocabList.txt";
 
 // Script
 function getUrl(){
@@ -48,19 +49,31 @@ async function getPaginationURLs(rootUrl){
 }
 
 async function getMasterVocabList(){
-    try{
-        let masterVocabList = [];
-        let rootUrl = getUrl();
-        let urlList = await getPaginationURLs(rootUrl);
-        for (const url of urlList){
-            let vocabList = await getVocabList(url);
-            masterVocabList = masterVocabList.concat(vocabList);   
-        }
-        console.log(`${masterVocabList.length} TERM MASTER VOCAB LIST COMPLETED`);
-        return masterVocabList;
-    } catch(err){
-        console.log(err.message);
+    let masterVocabList = [];
+    let rootUrl = getUrl();
+    let urlList = await getPaginationURLs(rootUrl);
+    for (const url of urlList){
+        let vocabList = await getVocabList(url);
+        masterVocabList = masterVocabList.concat(vocabList);   
     }
+    console.log(`${masterVocabList.length} TERM MASTER VOCAB LIST COMPLETED`);
+    return masterVocabList;
 }
 
-getMasterVocabList();
+function genFile(vocabList){
+    let fileData = "";
+    for(const term of vocabList){
+        fileData += `${term}${OUTPUT_DELIMETER}`;
+    }
+    fs.writeFile(path=OUTPUT_DIR + OUTPUT_FILE, data=fileData, callback= () => console.log(`Writing Complete - File: ${OUTPUT_DIR + OUTPUT_FILE} - Terms Generated: ${vocabList.length}.`));
+}
+
+function main(){
+    fs.rmSync(OUTPUT_DIR, { force: true, recursive: true});
+    fs.mkdir(OUTPUT_DIR, dir_err => {
+        if(dir_err) return console.error(err);
+        getMasterVocabList().then(genFile).catch(error => console.log(error.message));
+    });
+}
+
+main();
